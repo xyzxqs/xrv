@@ -17,9 +17,8 @@
 package io.github.xyzxqs.libs.xrv;
 
 /**
- * * Adapted from https://github.com/drakeet/MultiType
+ * Adapted from https://github.com/drakeet/MultiType
  * @author drakeet
- * @author xyzxqs (xyzxqs@gmail.com)
  */
 public class ProviderNotFoundException extends RuntimeException {
 
