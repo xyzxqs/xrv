@@ -64,7 +64,8 @@ public final class XrvAdapter extends RecyclerView.Adapter {
      * @param dataType the model data type
      * @param provider the provider
      */
-    public <T> void register(Class<T> dataType, @NonNull XrvProvider<? extends T, ? extends RecyclerView.ViewHolder> provider) {
+    public <T> void register(@NonNull Class<T> dataType,
+                             @NonNull XrvProvider<? super T, ? extends RecyclerView.ViewHolder> provider) {
         int type = addTypeByClazz(dataType);
 
         if (containTypeProvider(type)) {
