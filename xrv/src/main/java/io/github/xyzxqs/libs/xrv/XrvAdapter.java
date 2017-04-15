@@ -61,17 +61,17 @@ public final class XrvAdapter extends RecyclerView.Adapter {
      * Register a {@link XrvProvider} to this adapter. if this adapter already
      * have a provider handle the same type model data, will replace previous one.
      *
+     * @param dataType the model data type
      * @param provider the provider
-     * @throws IllegalProviderException if use the raw type of {@link XrvProvider}
      */
-    public void register(@NonNull XrvProvider provider) {
-        int type = addTypeByClazz(provider.getItemType());
+    public <T> void register(Class<T> dataType, @NonNull XrvProvider<? extends T, ? extends RecyclerView.ViewHolder> provider) {
+        int type = addTypeByClazz(dataType);
 
         if (containTypeProvider(type)) {
             Log.w(TAG, "register: ",
                     new Throwable("provider {a}.class already handle the {b}.class type, replace it"
                             .replace("{a}", getProviderByType(type).getClass().getSimpleName())
-                            .replace("{b}", provider.getItemType().getSimpleName())));
+                            .replace("{b}", dataType.getSimpleName())));
         }
 
         addTypeProviderPair(type, provider);
@@ -106,7 +106,7 @@ public final class XrvAdapter extends RecyclerView.Adapter {
     }
 
     @Override
-    @SuppressWarnings("unchecked")//guarded by the TypeUtil
+    @SuppressWarnings("unchecked")//guarded by register
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         Object item = dataList.get(position);
         int type = getItemViewType(position);
@@ -120,7 +120,7 @@ public final class XrvAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemViewType(int position) {
-        assert dataList != null;
+        //assert dataList != null;
         Object item = dataList.get(position);
         return getTypeByClazz(item.getClass());
     }

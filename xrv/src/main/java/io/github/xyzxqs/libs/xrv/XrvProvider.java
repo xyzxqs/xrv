@@ -23,9 +23,6 @@ import android.view.ViewGroup;
  * One XrvProvider only handle one {@link I} of item model data type and
  * one {@link V} of {@link android.support.v7.widget.RecyclerView.ViewHolder} type,
  * it is one to one mapping.
- * <p>
- * Note: {@link XrvAdapter} can not work with the raw type of XrvProvider,
- * please use the generic type.
  *
  * @param <I> the type of item model data used in {@link android.support.v7.widget.RecyclerView.ViewHolder}
  * @param <V> the subclass type of {@link android.support.v7.widget.RecyclerView.ViewHolder}
@@ -48,15 +45,5 @@ public abstract class XrvProvider<I, V extends RecyclerView.ViewHolder> {
      */
     public final XrvAdapter getAdapter() {
         return adapter;
-    }
-
-    /* internal */ Class<?> getItemType() {
-        Class<?> type = TypeUtil.getTypeArguments(XrvProvider.class, getClass()).get(0);
-        if (type == null) {
-            throw new IllegalProviderException("Please use the generic type of {a}"
-                    .replace("{a}", XrvProvider.class.getSimpleName()));
-        } else {
-            return type;
-        }
     }
 }
