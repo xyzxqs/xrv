@@ -15,8 +15,8 @@
  */
 package io.github.xyzxqs.libs.xrv;
 
+import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -32,10 +32,8 @@ import java.util.List;
  * @see XrvProvider
  */
 
-public final class XrvAdapter extends RecyclerView.Adapter {
+public abstract class XrvAdapter extends RecyclerView.Adapter {
     private static final String TAG = XrvAdapter.class.getSimpleName();
-
-    private List<?> dataList;
 
     private final ArrayMap<Class<?>, XrvProviderAssigner> dataTypeAssignerMap;
     private final ArrayMap<Class<? extends XrvProvider>, XrvProvider> viewTypeProviderMap;
@@ -43,11 +41,6 @@ public final class XrvAdapter extends RecyclerView.Adapter {
     private LayoutInflater layoutInflater;
 
     public XrvAdapter() {
-        this(null);
-    }
-
-    public XrvAdapter(List<?> items) {
-        dataList = items;
         dataTypeAssignerMap = new ArrayMap<>();
         viewTypeProviderMap = new ArrayMap<>();
     }
@@ -60,6 +53,7 @@ public final class XrvAdapter extends RecyclerView.Adapter {
      * @param provider the provider
      * @see #register(Class, XrvProviderAssigner) for one data type to many provider mapping
      */
+    @CallSuper
     public <T> void register(@NonNull Class<T> dataType,
                              @NonNull final XrvProvider<? super T, ? extends RecyclerView.ViewHolder> provider) {
         register(dataType, new XrvProviderAssigner<T>() {
@@ -78,6 +72,7 @@ public final class XrvAdapter extends RecyclerView.Adapter {
      * @param providerAssigner provider assigner
      * @see #register(Class, XrvProvider) for one data type to one provider mapping
      */
+    @CallSuper
     public <T> void register(@NonNull Class<T> dataType, @NonNull XrvProviderAssigner<T> providerAssigner) {
         if (dataTypeAssignerMap.containKey(dataType)) {
             Log.w(TAG, "register: ", new Throwable("providerAssigner {a}.class already handle the {b}.class type, replace it"
@@ -87,50 +82,42 @@ public final class XrvAdapter extends RecyclerView.Adapter {
         dataTypeAssignerMap.put(dataType, providerAssigner);
     }
 
-    /**
-     * Update the items, but not update items view. If you want to refresh the items views, you should
-     * call {@link RecyclerView.Adapter#notifyDataSetChanged()}, or RecyclerView.Adapter#notifyItem*()
-     * by yourself.
-     * <p>
-     * You can use {@link Items} if you like, so you can add any object type to it.
-     * <p>
-     * Note: If the items you set contain a object type that there is no provider/providerAssigner registered for,
-     * it will throw {@link NotFoundException} when update items view, because we know nothing
-     * about what to do for this case.
-     *
-     * @param items the new items
-     * @see Items
-     */
-    public void setItems(@Nullable List<?> items) {
-        dataList = items;
-    }
-
     @Override
+    @CallSuper
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (layoutInflater == null) {
             layoutInflater = LayoutInflater.from(parent.getContext());
         }
-        XrvProvider provider = getProviderByType(viewType);
+        XrvProvider provider = getProvider(viewType);
         provider.adapter = XrvAdapter.this;
         return provider.onCreateViewHolder(layoutInflater, parent);
     }
 
     @Override
+    @CallSuper
     @SuppressWarnings("unchecked")//guarded by register
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        Object item = dataList.get(position);
+        Object item = getItem(position);
         int type = getItemViewType(position);
-        getProviderByType(type).onBindViewHolder(holder, item);
+        getProvider(type).onBindViewHolder(holder, item);
     }
 
     @Override
-    public int getItemCount() {
-        return dataList == null ? 0 : dataList.size();
+    @CallSuper
+    @SuppressWarnings("unchecked")
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position, List payloads) {
+        super.onBindViewHolder(holder, position, payloads);
     }
 
     @Override
+    public abstract int getItemCount();
+
+    public abstract Object getItem(int position);
+
+    @Override
+    @CallSuper
     public int getItemViewType(int position) {
-        Object obj = dataList.get(position);
+        Object obj = getItem(position);
         XrvProviderAssigner assigner = dataTypeAssignerMap.getValue(obj.getClass());
         if (assigner != null) {
             //guarded by dataTypeAssignerMap
@@ -147,7 +134,7 @@ public final class XrvAdapter extends RecyclerView.Adapter {
         }
     }
 
-    private XrvProvider getProviderByType(int type) {
-        return viewTypeProviderMap.getValueAt(type);
+    protected XrvProvider getProvider(int viewType) {
+        return viewTypeProviderMap.getValueAt(viewType);
     }
 }
