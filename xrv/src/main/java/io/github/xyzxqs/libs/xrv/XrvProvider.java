@@ -41,7 +41,7 @@ public abstract class XrvProvider<I, V extends RecyclerView.ViewHolder> {
     /**
      * Get the {@link XrvAdapter}
      *
-     * @return the {@link XrvAdapter} this provider associated with.
+     * @return the {@link XrvAdapter} this assignProvider associated with.
      */
     public final XrvAdapter getAdapter() {
         return adapter;

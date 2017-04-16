@@ -16,6 +16,9 @@
 
 package io.github.xyzxqs.libs.xrv;
 
+/**
+ * @author xyzxqs (xyzxqs@gmail.com)
+ */
 public class NotFoundException extends RuntimeException {
 
     public NotFoundException() {

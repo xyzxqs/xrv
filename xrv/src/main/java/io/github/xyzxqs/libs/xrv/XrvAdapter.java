@@ -33,15 +33,12 @@ import java.util.List;
  */
 
 public final class XrvAdapter extends RecyclerView.Adapter {
-
     private static final String TAG = XrvAdapter.class.getSimpleName();
 
     private List<?> dataList;
 
-    private final ArrayMap<Class<?>, XrvProviderBuilder> builderArrayMap;
-
-    private final ArrayMap<Class<? extends XrvProvider>, XrvProvider> providerList;
-
+    private final ArrayMap<Class<?>, XrvProviderAssigner> dataTypeAssignerMap;
+    private final ArrayMap<Class<? extends XrvProvider>, XrvProvider> providerTypeProviderMap;
 
     private LayoutInflater layoutInflater;
 
@@ -51,43 +48,43 @@ public final class XrvAdapter extends RecyclerView.Adapter {
 
     public XrvAdapter(List<?> items) {
         dataList = items;
-        builderArrayMap = new ArrayMap<>();
-        providerList = new ArrayMap<>();
+        dataTypeAssignerMap = new ArrayMap<>();
+        providerTypeProviderMap = new ArrayMap<>();
     }
 
     /**
-     * Register a {@link XrvProvider} to this adapter, for one data type map to one provider
+     * Register a {@link XrvProvider} to this adapter, for one data type map to one assignProvider
      * if this adapter already have a provider handle the same type model data, will replace previous one.
      *
      * @param dataType the model data type
      * @param provider the provider
-     * @see #register(Class, XrvProviderBuilder) for one data type map to many provider
+     * @see #register(Class, XrvProviderAssigner) for one data type map to many provider
      */
     public <T> void register(@NonNull Class<T> dataType,
                              @NonNull final XrvProvider<? super T, ? extends RecyclerView.ViewHolder> provider) {
-        register(dataType, new XrvProviderBuilder<T>() {
+        register(dataType, new XrvProviderAssigner<T>() {
             @Override
-            public XrvProvider<? super T, ? extends RecyclerView.ViewHolder> getProvider(T item) {
+            public XrvProvider<? super T, ? extends RecyclerView.ViewHolder> assignProvider(T item) {
                 return provider;
             }
         });
     }
 
     /**
-     * Register a {@link XrvProviderBuilder} to this adapter, for one data type map to many provider
-     * if this adapter already have a provider handle the same type model data, will replace previous one.
+     * Register a {@link XrvProviderAssigner} to this adapter, for one data type map to many assignProvider
+     * if this adapter already have a assignProvider handle the same type model data, will replace previous one.
      *
-     * @param dataType        the model data type
-     * @param providerBuilder provider builder
+     * @param dataType         the model data type
+     * @param providerAssigner provider assigner
      * @see #register(Class, XrvProvider) for one data type map to one provider
      */
-    public <T> void register(@NonNull Class<T> dataType, @NonNull XrvProviderBuilder<T> providerBuilder) {
-        if (builderArrayMap.containKey(dataType)) {
-            Log.w(TAG, "register: ", new Throwable("providerBuilder {a}.class already handle the {b}.class type, replace it"
-                    .replace("{a}", builderArrayMap.getValue(dataType).getClass().getSimpleName())
+    public <T> void register(@NonNull Class<T> dataType, @NonNull XrvProviderAssigner<T> providerAssigner) {
+        if (dataTypeAssignerMap.containKey(dataType)) {
+            Log.w(TAG, "register: ", new Throwable("providerAssigner {a}.class already handle the {b}.class type, replace it"
+                    .replace("{a}", dataTypeAssignerMap.getValue(dataType).getClass().getSimpleName())
                     .replace("{b}", dataType.getSimpleName())));
         }
-        builderArrayMap.put(dataType, providerBuilder);
+        dataTypeAssignerMap.put(dataType, providerAssigner);
     }
 
     /**
@@ -134,23 +131,23 @@ public final class XrvAdapter extends RecyclerView.Adapter {
     @Override
     public int getItemViewType(int position) {
         Object obj = dataList.get(position);
-        XrvProviderBuilder builder = builderArrayMap.getValue(obj.getClass());
-        if (builder != null) {
-            //guarded by builderArrayMap
+        XrvProviderAssigner assigner = dataTypeAssignerMap.getValue(obj.getClass());
+        if (assigner != null) {
+            //guarded by dataTypeAssignerMap
             @SuppressWarnings("unchecked")
-            XrvProvider provider = builder.getProvider(obj);
+            XrvProvider provider = assigner.assignProvider(obj);
             Class<? extends XrvProvider> providerClazz = provider.getClass();
-            if (!providerList.containKey(providerClazz)) {
-                providerList.put(providerClazz, provider);
+            if (!providerTypeProviderMap.containKey(providerClazz)) {
+                providerTypeProviderMap.put(providerClazz, provider);
             }
-            return providerList.indexOfKey(providerClazz);
+            return providerTypeProviderMap.indexOfKey(providerClazz);
         } else {
-            throw new NotFoundException("no XrvProvider or XrvProviderBuilder found for {a}.class"
+            throw new NotFoundException("no XrvProvider or XrvProviderAssigner found for {a}.class"
                     .replace("{a}", obj.getClass().getSimpleName()));
         }
     }
 
     private XrvProvider getProviderByType(int type) {
-        return providerList.getValueAt(type);
+        return providerTypeProviderMap.getValueAt(type);
     }
 }

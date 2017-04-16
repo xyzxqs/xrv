@@ -14,7 +14,6 @@ class ArrayMap<K, V> {
     private final ArrayList<K> kArrayList;
     private final SparseArray<V> vSparseArray;
 
-
     public ArrayMap() {
         this(new ArrayList<K>(), new SparseArray<V>());
     }
@@ -44,7 +43,7 @@ class ArrayMap<K, V> {
     }
 
     public void put(@NonNull K k, @NonNull V v) {
-        int i = indexOfKey(k);
+        int i = kArrayList.indexOf(k);
         if (i < 0) {
             kArrayList.add(k);
             vSparseArray.put(kArrayList.size() - 1, v);
