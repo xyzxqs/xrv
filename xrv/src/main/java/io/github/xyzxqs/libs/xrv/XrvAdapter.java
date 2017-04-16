@@ -19,11 +19,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,10 +38,10 @@ public final class XrvAdapter extends RecyclerView.Adapter {
 
     private List<?> dataList;
 
-    //viewType = clazzList.indexOf(clazz);
-    private final List<Class<?>> clazzList;
+    private final ArrayMap<Class<?>, XrvProviderBuilder> builderArrayMap;
 
-    private final SparseArray<XrvProvider> typeProviderMap;
+    private final ArrayMap<Class<? extends XrvProvider>, XrvProvider> providerList;
+
 
     private LayoutInflater layoutInflater;
 
@@ -53,29 +51,43 @@ public final class XrvAdapter extends RecyclerView.Adapter {
 
     public XrvAdapter(List<?> items) {
         dataList = items;
-        clazzList = new ArrayList<>();
-        typeProviderMap = new SparseArray<>();
+        builderArrayMap = new ArrayMap<>();
+        providerList = new ArrayMap<>();
     }
 
     /**
-     * Register a {@link XrvProvider} to this adapter. if this adapter already
-     * have a provider handle the same type model data, will replace previous one.
+     * Register a {@link XrvProvider} to this adapter, for one data type map to one provider
+     * if this adapter already have a provider handle the same type model data, will replace previous one.
      *
      * @param dataType the model data type
      * @param provider the provider
+     * @see #register(Class, XrvProviderBuilder) for one data type map to many provider
      */
     public <T> void register(@NonNull Class<T> dataType,
-                             @NonNull XrvProvider<? super T, ? extends RecyclerView.ViewHolder> provider) {
-        int type = addTypeByClazz(dataType);
+                             @NonNull final XrvProvider<? super T, ? extends RecyclerView.ViewHolder> provider) {
+        register(dataType, new XrvProviderBuilder<T>() {
+            @Override
+            public XrvProvider<? super T, ? extends RecyclerView.ViewHolder> getProvider(T item) {
+                return provider;
+            }
+        });
+    }
 
-        if (containTypeProvider(type)) {
-            Log.w(TAG, "register: ",
-                    new Throwable("provider {a}.class already handle the {b}.class type, replace it"
-                            .replace("{a}", getProviderByType(type).getClass().getSimpleName())
-                            .replace("{b}", dataType.getSimpleName())));
+    /**
+     * Register a {@link XrvProviderBuilder} to this adapter, for one data type map to many provider
+     * if this adapter already have a provider handle the same type model data, will replace previous one.
+     *
+     * @param dataType        the model data type
+     * @param providerBuilder provider builder
+     * @see #register(Class, XrvProvider) for one data type map to one provider
+     */
+    public <T> void register(@NonNull Class<T> dataType, @NonNull XrvProviderBuilder<T> providerBuilder) {
+        if (builderArrayMap.containKey(dataType)) {
+            Log.w(TAG, "register: ", new Throwable("providerBuilder {a}.class already handle the {b}.class type, replace it"
+                    .replace("{a}", builderArrayMap.getValue(dataType).getClass().getSimpleName())
+                    .replace("{b}", dataType.getSimpleName())));
         }
-
-        addTypeProviderPair(type, provider);
+        builderArrayMap.put(dataType, providerBuilder);
     }
 
     /**
@@ -86,7 +98,7 @@ public final class XrvAdapter extends RecyclerView.Adapter {
      * You can use {@link Items} if you like, so you can add any object type to it.
      * <p>
      * Note: If the items you set contain a object type that there is no provider registered for,
-     * it will throw {@link ProviderNotFoundException} when update items view, because we know nothing
+     * it will throw {@link NotFoundException} when update items view, because we know nothing
      * about what to do for this case.
      *
      * @param items the new items
@@ -121,40 +133,24 @@ public final class XrvAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemViewType(int position) {
-        //assert dataList != null;
-        Object item = dataList.get(position);
-        return getTypeByClazz(item.getClass());
-    }
-
-    private int getTypeByClazz(Class<?> clazz) {
-        int type = clazzList.indexOf(clazz);
-        if (type == -1) {
-            throw new ProviderNotFoundException("no provider registered for {a}.class"
-                    .replace("{a}", clazz.getSimpleName()));
+        Object obj = dataList.get(position);
+        XrvProviderBuilder builder = builderArrayMap.getValue(obj.getClass());
+        if (builder != null) {
+            //guarded by builderArrayMap
+            @SuppressWarnings("unchecked")
+            XrvProvider provider = builder.getProvider(obj);
+            Class<? extends XrvProvider> providerClazz = provider.getClass();
+            if (!providerList.containKey(providerClazz)) {
+                providerList.put(providerClazz, provider);
+            }
+            return providerList.indexOfKey(providerClazz);
         } else {
-            return type;
+            throw new NotFoundException("no XrvProvider or XrvProviderBuilder found for {a}.class"
+                    .replace("{a}", obj.getClass().getSimpleName()));
         }
     }
 
-    private int addTypeByClazz(Class<?> clazz) {
-        int type = clazzList.indexOf(clazz);
-        if (type == -1) {
-            clazzList.add(clazz);
-            type = clazzList.indexOf(clazz);
-        }
-        return type;
-    }
-
-    private XrvProvider getProviderByType(int viewType) {
-        return typeProviderMap.get(viewType, null);
-    }
-
-    private void addTypeProviderPair(int type, XrvProvider provider) {
-        //only support one to one mapping
-        typeProviderMap.put(type, provider);
-    }
-
-    private boolean containTypeProvider(int type) {
-        return typeProviderMap.indexOfKey(type) > 0;
+    private XrvProvider getProviderByType(int type) {
+        return providerList.getValueAt(type);
     }
 }
