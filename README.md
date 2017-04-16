@@ -5,7 +5,7 @@ RecyclerVew Adapter
 Gradle:
 ```groovy
 dependencies {
-  compile 'io.github.xyzxqs.libs:xrv:3.2.0'
+  compile 'io.github.xyzxqs.libs:xrv:3.3.0'
 }
 ```
 
