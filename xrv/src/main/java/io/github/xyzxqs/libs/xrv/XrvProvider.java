@@ -20,11 +20,9 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 /**
- * One XrvProvider only handle one {@link I} of item model data type and
- * one {@link V} of {@link android.support.v7.widget.RecyclerView.ViewHolder} type,
- * it is one to one mapping.
+ * One XrvProvider is one view type in {@link RecyclerView.Adapter}
  *
- * @param <I> the type of item model data used in {@link android.support.v7.widget.RecyclerView.ViewHolder}
+ * @param <I> the type of item model data used in this type view
  * @param <V> the subclass type of {@link android.support.v7.widget.RecyclerView.ViewHolder}
  * @author xyzxqs (xyzxqs@gmail.com)
  * @see XrvAdapter

@@ -25,7 +25,7 @@ public interface XrvProviderAssigner<T> {
     /**
      * get XrvProvider to handle special item
      * <p>
-     * NOTE: for performance, do not create new assignProvider instance in this method
+     * NOTE: for performance, do not create new provider instance in this method
      *
      * @param item data item
      * @return XrvProvider to handle this item
