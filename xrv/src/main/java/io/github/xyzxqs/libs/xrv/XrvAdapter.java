@@ -38,7 +38,7 @@ public final class XrvAdapter extends RecyclerView.Adapter {
     private List<?> dataList;
 
     private final ArrayMap<Class<?>, XrvProviderAssigner> dataTypeAssignerMap;
-    private final ArrayMap<Class<? extends XrvProvider>, XrvProvider> providerTypeProviderMap;
+    private final ArrayMap<Class<? extends XrvProvider>, XrvProvider> viewTypeProviderMap;
 
     private LayoutInflater layoutInflater;
 
@@ -49,16 +49,16 @@ public final class XrvAdapter extends RecyclerView.Adapter {
     public XrvAdapter(List<?> items) {
         dataList = items;
         dataTypeAssignerMap = new ArrayMap<>();
-        providerTypeProviderMap = new ArrayMap<>();
+        viewTypeProviderMap = new ArrayMap<>();
     }
 
     /**
-     * Register a {@link XrvProvider} to this adapter, for one data type map to one assignProvider
+     * Register a {@link XrvProvider} to this adapter, for one data type to one provider mapping
      * if this adapter already have a provider handle the same type model data, will replace previous one.
      *
      * @param dataType the model data type
      * @param provider the provider
-     * @see #register(Class, XrvProviderAssigner) for one data type map to many provider
+     * @see #register(Class, XrvProviderAssigner) for one data type to many provider mapping
      */
     public <T> void register(@NonNull Class<T> dataType,
                              @NonNull final XrvProvider<? super T, ? extends RecyclerView.ViewHolder> provider) {
@@ -71,12 +71,12 @@ public final class XrvAdapter extends RecyclerView.Adapter {
     }
 
     /**
-     * Register a {@link XrvProviderAssigner} to this adapter, for one data type map to many assignProvider
+     * Register a {@link XrvProviderAssigner} to this adapter, for one data type to many provider mapping
      * if this adapter already have a assignProvider handle the same type model data, will replace previous one.
      *
      * @param dataType         the model data type
      * @param providerAssigner provider assigner
-     * @see #register(Class, XrvProvider) for one data type map to one provider
+     * @see #register(Class, XrvProvider) for one data type to one provider mapping
      */
     public <T> void register(@NonNull Class<T> dataType, @NonNull XrvProviderAssigner<T> providerAssigner) {
         if (dataTypeAssignerMap.containKey(dataType)) {
@@ -94,7 +94,7 @@ public final class XrvAdapter extends RecyclerView.Adapter {
      * <p>
      * You can use {@link Items} if you like, so you can add any object type to it.
      * <p>
-     * Note: If the items you set contain a object type that there is no provider registered for,
+     * Note: If the items you set contain a object type that there is no provider/providerAssigner registered for,
      * it will throw {@link NotFoundException} when update items view, because we know nothing
      * about what to do for this case.
      *
@@ -137,10 +137,10 @@ public final class XrvAdapter extends RecyclerView.Adapter {
             @SuppressWarnings("unchecked")
             XrvProvider provider = assigner.assignProvider(obj);
             Class<? extends XrvProvider> providerClazz = provider.getClass();
-            if (!providerTypeProviderMap.containKey(providerClazz)) {
-                providerTypeProviderMap.put(providerClazz, provider);
+            if (!viewTypeProviderMap.containKey(providerClazz)) {
+                viewTypeProviderMap.put(providerClazz, provider);
             }
-            return providerTypeProviderMap.indexOfKey(providerClazz);
+            return viewTypeProviderMap.indexOfKey(providerClazz);
         } else {
             throw new NotFoundException("no XrvProvider or XrvProviderAssigner found for {a}.class"
                     .replace("{a}", obj.getClass().getSimpleName()));
@@ -148,6 +148,6 @@ public final class XrvAdapter extends RecyclerView.Adapter {
     }
 
     private XrvProvider getProviderByType(int type) {
-        return providerTypeProviderMap.getValueAt(type);
+        return viewTypeProviderMap.getValueAt(type);
     }
 }
