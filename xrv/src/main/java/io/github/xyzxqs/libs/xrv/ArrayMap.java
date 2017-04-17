@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.util.SparseArray;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 /**
  * @author xyzxqs (xyzxqs@gmail.com)
