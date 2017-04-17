@@ -74,7 +74,7 @@ public abstract class XrvAdapter extends RecyclerView.Adapter {
      */
     @CallSuper
     public <T> void register(@NonNull Class<T> dataType, @NonNull XrvProviderAssigner<T> providerAssigner) {
-        if (dataTypeAssignerMap.containKey(dataType)) {
+        if (dataTypeAssignerMap.containsKey(dataType)) {
             Log.w(TAG, "register: ", new Throwable("providerAssigner {a}.class already handle the {b}.class type, replace it"
                     .replace("{a}", dataTypeAssignerMap.getValue(dataType).getClass().getSimpleName())
                     .replace("{b}", dataType.getSimpleName())));
@@ -124,7 +124,7 @@ public abstract class XrvAdapter extends RecyclerView.Adapter {
             @SuppressWarnings("unchecked")
             XrvProvider provider = assigner.assignProvider(obj);
             Class<? extends XrvProvider> providerClazz = provider.getClass();
-            if (!viewTypeProviderMap.containKey(providerClazz)) {
+            if (!viewTypeProviderMap.containsKey(providerClazz)) {
                 viewTypeProviderMap.put(providerClazz, provider);
             }
             return viewTypeProviderMap.indexOfKey(providerClazz);

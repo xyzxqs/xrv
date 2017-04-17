@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.util.SparseArray;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * @author xyzxqs (xyzxqs@gmail.com)
@@ -46,14 +47,14 @@ class ArrayMap<K, V> {
         int i = kArrayList.indexOf(k);
         if (i < 0) {
             kArrayList.add(k);
-            vSparseArray.put(kArrayList.size() - 1, v);
+            vSparseArray.append(kArrayList.size() - 1, v);
         } else {
             kArrayList.add(i, k);
             vSparseArray.put(i, v);
         }
     }
 
-    public boolean containKey(@NonNull K k) {
+    public boolean containsKey(@NonNull K k) {
         return kArrayList.contains(k);
     }
 
