@@ -85,6 +85,7 @@ public abstract class XrvAdapter extends RecyclerView.Adapter {
             Log.w(TAG, "register: ", new Throwable("providerAssigner {a}.class already handle the {b}.class type, replace it"
                     .replace("{a}", dataTypeAssignerMap.get(dataType).getClass().getSimpleName())
                     .replace("{b}", dataType.getSimpleName())));
+            // FIXME: 2017/4/20 现在来说，如果重复注册，有潜在在问题
         }
         dataTypeAssignerMap.put(dataType, providerAssigner);
     }
