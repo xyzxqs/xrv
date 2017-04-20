@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
         listAdapter.register(String.class, new StringProvider());
         listAdapter.register(Item.class, item -> {
-            //for performance, do not create new provider instance in this method
+            //do not create new provider instance in this method
             if (item.type == 1) {
                 return type1Provider;
             } else {

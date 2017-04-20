@@ -15,8 +15,6 @@
  */
 package io.github.xyzxqs.libs.xrv;
 
-import android.support.v7.widget.RecyclerView;
-
 /**
  * @author xyzxqs (xyzxqs@gmail.com)
  */
@@ -25,10 +23,10 @@ public interface XrvProviderAssigner<T> {
     /**
      * get XrvProvider to handle special item
      * <p>
-     * NOTE: for performance, do not create new provider instance in this method
+     * NOTE: do not create new provider instance in this method
      *
      * @param item data item
      * @return XrvProvider to handle this item
      */
-    XrvProvider<? super T, ? extends RecyclerView.ViewHolder> assignProvider(T item);
+    XrvProvider<? super T, ?> assignProvider(T item);
 }
