@@ -17,14 +17,14 @@ package io.github.xyzxqs.libs.xrv;
 
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
+import android.support.v4.util.ArrayMap;
+import android.support.v4.util.ArraySet;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,8 +47,8 @@ public abstract class XrvAdapter extends RecyclerView.Adapter {
     private LayoutInflater layoutInflater;
 
     public XrvAdapter() {
-        dataTypeAssignerMap = new HashMap<>();
-        providerTypeSet = new HashSet<>();
+        dataTypeAssignerMap = new ArrayMap<>();
+        providerTypeSet = new ArraySet<>();
         providerList = new ArrayList<>();
     }
 
@@ -85,7 +85,7 @@ public abstract class XrvAdapter extends RecyclerView.Adapter {
             Log.w(TAG, "register: ", new Throwable("providerAssigner {a}.class already handle the {b}.class type, replace it"
                     .replace("{a}", dataTypeAssignerMap.get(dataType).getClass().getSimpleName())
                     .replace("{b}", dataType.getSimpleName())));
-            // FIXME: 2017/4/20 现在来说，如果重复注册，有潜在在问题
+            // FIXME: 2017/4/20 如果重复注册，可能有潜在问题。
         }
         dataTypeAssignerMap.put(dataType, providerAssigner);
     }
