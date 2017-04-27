@@ -2,19 +2,21 @@ package io.github.xyzxqs.libs.xrv;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 
 import java.util.Arrays;
 
 /**
+ * Like the definition of a function, each x has a corresponding y,
+ * but a y can have multiple x correspondences
+ *
  * @author xyzxqs (xyzxqs@gmail.com)
  */
 
 class FuncMap<X, Y> {
     private static final int DEFAULT_CAPACITY = 10;
-    private static final Object[] EMPTY_XDATA = {};
-    private static final int[] EMPTY_MAPER = {};
-    private static final YHolder[] EMPTY_YDATA = {};
+    private static final Object[] EMPTY_X_DATA = {};
+    private static final int[] EMPTY_MAPPER = {};
+    private static final YHolder[] EMPTY_Y_DATA = {};
 
     /**
      * The maximum size of array to allocate.
@@ -40,9 +42,9 @@ class FuncMap<X, Y> {
     private YHolder[] yArray;
 
     public FuncMap() {
-        xArray = EMPTY_XDATA;
-        yArray = EMPTY_YDATA;
-        mapper = EMPTY_MAPER;
+        xArray = EMPTY_X_DATA;
+        yArray = EMPTY_Y_DATA;
+        mapper = EMPTY_MAPPER;
     }
 
     public FuncMap(int capacity) {
@@ -51,7 +53,7 @@ class FuncMap<X, Y> {
         mapper = new int[capacity];
     }
 
-    public void put(X x, Y y) {
+    public void connect(X x, Y y) {
         int xi = indexOfX(x);
         int yi = indexOfY(y);
         if (xi >= 0) {
@@ -104,7 +106,7 @@ class FuncMap<X, Y> {
     }
 
     private void ensureXCapacity(int minCapacity) {
-        if (xArray == EMPTY_XDATA) {
+        if (xArray == EMPTY_X_DATA) {
             minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
         }
 
@@ -114,7 +116,7 @@ class FuncMap<X, Y> {
     }
 
     private void ensureYCapacity(int minCapacity) {
-        if (yArray == EMPTY_YDATA) {
+        if (yArray == EMPTY_Y_DATA) {
             minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
         }
 

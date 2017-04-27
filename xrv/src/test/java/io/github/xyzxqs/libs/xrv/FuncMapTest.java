@@ -2,8 +2,6 @@ package io.github.xyzxqs.libs.xrv;
 
 import org.junit.Test;
 
-import java.util.Arrays;
-
 import static org.junit.Assert.*;
 
 /**
@@ -49,9 +47,9 @@ public class FuncMapTest {
     public void test_getX_getY() throws Exception {
         FuncMap<X, Y> xyFuncMap = new FuncMap<>();
 
-        xyFuncMap.put(x1, y1);
-        xyFuncMap.put(x2, y1);
-        xyFuncMap.put(x3, y2);
+        xyFuncMap.connect(x1, y1);
+        xyFuncMap.connect(x2, y1);
+        xyFuncMap.connect(x3, y2);
 
         assertArrayEquals(new X[]{x1, x2}, xyFuncMap.getX(y1));
         assertArrayEquals(new X[]{x3}, xyFuncMap.getX(y2));
@@ -64,14 +62,14 @@ public class FuncMapTest {
     @Test
     public void test_rmX_rmY() throws Exception {
         FuncMap<X, Y> xyFuncMap = new FuncMap<>(10);
-        xyFuncMap.put(x1, y1);
-        xyFuncMap.put(x2, y1);
-        xyFuncMap.put(x3, y2);
+        xyFuncMap.connect(x1, y1);
+        xyFuncMap.connect(x2, y1);
+        xyFuncMap.connect(x3, y2);
 
         xyFuncMap.rmX(x1);
         assertArrayEquals(new X[]{x2}, xyFuncMap.getX(y1));
 
-        xyFuncMap.put(x1, y1);
+        xyFuncMap.connect(x1, y1);
         assertArrayEquals(new X[]{x2, x1}, xyFuncMap.getX(y1));
         xyFuncMap.rmY(y1);
 

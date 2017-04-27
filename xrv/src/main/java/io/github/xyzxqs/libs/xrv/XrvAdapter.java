@@ -140,7 +140,7 @@ public abstract class XrvAdapter extends RecyclerView.Adapter {
                 }
             } else {
                 providerTypeSet.add(providerClazz);
-                assignerProviderMap.put(provider, assigner);
+                assignerProviderMap.connect(provider, assigner);
             }
             return assignerProviderMap.indexOfX(provider);
         } else {
