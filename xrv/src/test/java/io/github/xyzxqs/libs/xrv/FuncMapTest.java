@@ -2,6 +2,8 @@ package io.github.xyzxqs.libs.xrv;
 
 import org.junit.Test;
 
+import java.util.Arrays;
+
 import static org.junit.Assert.*;
 
 /**
@@ -51,8 +53,8 @@ public class FuncMapTest {
         xyFuncMap.connect(x2, y1);
         xyFuncMap.connect(x3, y2);
 
-        assertArrayEquals(new X[]{x1, x2}, xyFuncMap.getX(y1));
-        assertArrayEquals(new X[]{x3}, xyFuncMap.getX(y2));
+        assertEquals(2, xyFuncMap.getX(y1).size());
+        assertEquals(1, xyFuncMap.getX(y2).size());
 
         assertEquals(y1, xyFuncMap.getY(x1));
         assertEquals(y1, xyFuncMap.getY(x2));
@@ -67,18 +69,37 @@ public class FuncMapTest {
         xyFuncMap.connect(x3, y2);
 
         xyFuncMap.rmX(x1);
-        assertArrayEquals(new X[]{x2}, xyFuncMap.getX(y1));
+        assertEquals(1, xyFuncMap.getX(y1).size());
 
         xyFuncMap.connect(x1, y1);
-        assertArrayEquals(new X[]{x2, x1}, xyFuncMap.getX(y1));
+        assertEquals(2, xyFuncMap.getX(y1).size());
         xyFuncMap.rmY(y1);
 
-        assertFalse(xyFuncMap.hasX(x1));
-        assertFalse(xyFuncMap.hasX(x2));
+        assertTrue(xyFuncMap.hasX(x1));
+        assertTrue(xyFuncMap.hasX(x2));
         assertTrue(xyFuncMap.hasX(x3));
 
         assertFalse(xyFuncMap.hasY(y1));
         assertTrue(xyFuncMap.hasY(y2));
 
+    }
+
+    @Test
+    public void test_IndexOfX() {
+        FuncMap<X, Y> xyFuncMap = new FuncMap<>(10);
+        xyFuncMap.connect(x1, y1);
+        xyFuncMap.connect(x2, y1);
+        xyFuncMap.connect(x3, y2);
+
+        assertEquals(0, xyFuncMap.indexOfX(x1));
+        assertEquals(y1, xyFuncMap.getY(x1));
+
+        xyFuncMap.connect(x1, y2);
+        assertEquals(0, xyFuncMap.indexOfX(x1));
+        assertEquals(y2, xyFuncMap.getY(x1));
+
+        xyFuncMap.rmX(x1);
+        assertEquals(0, xyFuncMap.indexOfX(x1));
+        assertNull(xyFuncMap.getY(x1));
     }
 }

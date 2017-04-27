@@ -54,5 +54,17 @@ public class MainActivity extends AppCompatActivity {
 
         listAdapter.setList(itemList);
         listAdapter.notifyDataSetChanged();
+
+        recyclerView.postDelayed(() -> {
+            listAdapter.register(Item.class, item -> {
+                //do not create new provider instance in this method
+                if (item.type == 1) {
+                    return type2Provider;
+                } else {
+                    return type1Provider;
+                }
+            });
+            listAdapter.notifyDataSetChanged();
+        }, 3000);
     }
 }

@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Like the definition of a function, each x has a corresponding y,
@@ -58,9 +59,10 @@ class FuncMap<X, Y> {
         int yi = indexOfY(y);
         if (xi >= 0) {
             int oldYi = mapper[xi];
-            yArray[oldYi].refCount--;
-            rmYIfRefCountIsZero(oldYi);
-
+            if (oldYi >= 0) {
+                yArray[oldYi].refCount--;
+                rmYIfRefCountIsZero(oldYi);
+            }
             if (yi >= 0) {
                 mapper[xi] = yi;
                 yArray[yi].refCount++;
@@ -190,16 +192,15 @@ class FuncMap<X, Y> {
 
     @SuppressWarnings("unchecked")
     @NonNull
-    public X[] getX(Y y) {
+    public List<X> getX(Y y) {
         int yi = indexOfY(y);
-        int rc = yArray[yi].refCount;
-        Object[] rs = new Object[yi >= 0 ? rc : 0];
-        for (int i = 0, ri = 0; i < xLength && ri < rc; i++) {
+        Object[] rs = new Object[yi >= 0 ? yArray[yi].refCount : 0];
+        for (int i = 0, ri = 0; i < xLength; i++) {
             if (mapper[i] == yi) {
                 rs[ri++] = xArray[i];
             }
         }
-        return (X[]) rs;
+        return (List<X>) Arrays.asList(rs);
     }
 
     @SuppressWarnings("unchecked")
@@ -207,12 +208,18 @@ class FuncMap<X, Y> {
     public Y getY(X x) {
         int xi = indexOfX(x);
         if (xi >= 0) {
-            return (Y) yArray[mapper[xi]].value;
+            int yi = mapper[xi];
+            if (yi >= 0) {
+                return (Y) yArray[yi].value;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
         }
-        return null;
     }
 
-    public int indexOfY(Y y) {
+    private int indexOfY(Y y) {
         for (int i = 0; i < yLength; i++) {
             if (yArray[i].value == y) {
                 return i;
@@ -247,7 +254,7 @@ class FuncMap<X, Y> {
         if (y == null) {
             return false;
         } else {
-            for (int i = 0; i < xLength; i++) {
+            for (int i = 0; i < yLength; i++) {
                 if (y == yArray[i].value) {
                     return true;
                 }
@@ -269,16 +276,25 @@ class FuncMap<X, Y> {
 
             if (i < xLength) {
                 int yi = mapper[i];
-                System.arraycopy(xArray, i + 1, xArray, i, xLength - 1 - i);
-                System.arraycopy(mapper, i + 1, mapper, i, xLength - 1 - i);
-                xLength--;
-                yArray[yi].refCount--;
-                rmYIfRefCountIsZero(yi);
+                if (yi >= 0) {
+                    removeXInternal(i);
+                    yArray[yi].refCount--;
+                    rmYIfRefCountIsZero(yi);
+                }
                 return true;
             } else {
                 return false;
             }
         }
+    }
+
+    private void removeXInternal(int i) {
+        /*为什么注释？不能删除，只能是标记为不可用，不然indexOfX方法不可信，将导致rv adapter的item type不稳定
+        System.arraycopy(xArray, i + 1, xArray, i, xLength - 1 - i);
+        System.arraycopy(mapper, i + 1, mapper, i, xLength - 1 - i);
+        xLength--;
+        */
+        mapper[i] = -2;
     }
 
     public boolean rmY(Y y) {
@@ -288,9 +304,7 @@ class FuncMap<X, Y> {
         } else {
             for (int i = 0; i < xLength; i++) {
                 if (mapper[i] == yi) {
-                    System.arraycopy(xArray, i + 1, xArray, i, xLength - 1 - i);
-                    System.arraycopy(mapper, i + 1, mapper, i, xLength - 1 - i);
-                    xLength--;
+                    removeXInternal(i);
                 }
             }
             yArray[yi].refCount = 0;
