@@ -9,7 +9,7 @@ See [demo code](sample/src/main/java/io/github/xyzxqs/app/xrvdemo/MainActivity.j
 #### Gradle:
 ```groovy
 dependencies {
-  compile 'io.github.xyzxqs.libs:xrv:5.0.2'
+  compile 'io.github.xyzxqs.libs:xrv:5.0.3'
 }
 ```
 
