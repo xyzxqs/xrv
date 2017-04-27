@@ -28,23 +28,23 @@ class FuncMap<X, Y> {
         private int refCount;
     }
 
-    private int[] maper;
-    private int xesLength;
-    private Object[] xes;
+    private int[] mapper;
+    private int xLength;
+    private Object[] xArray;
 
-    private YHolder[] yes;
-    private int yesLength;
+    private YHolder[] yArray;
+    private int yLength;
 
     public FuncMap() {
-        xes = EMPTY_XDATA;
-        yes = EMPTY_YDATA;
-        maper = EMPTY_MAPER;
+        xArray = EMPTY_XDATA;
+        yArray = EMPTY_YDATA;
+        mapper = EMPTY_MAPER;
     }
 
     public FuncMap(int capacity) {
-        xes = new Object[capacity];
-        yes = new YHolder[capacity];
-        maper = new int[capacity];
+        xArray = new Object[capacity];
+        yArray = new YHolder[capacity];
+        mapper = new int[capacity];
     }
 
     public void put(X x, Y y) {
@@ -52,22 +52,22 @@ class FuncMap<X, Y> {
         int yi = indexOfY(y);
         if (xi >= 0) {
             if (yi >= 0) {
-                maper[xi] = yi;
+                mapper[xi] = yi;
             } else {
-                ensureYCapacity(yesLength + 1);
-                maper[xi] = yesLength;
-                yes[yesLength++] = createY(y);
+                ensureYCapacity(yLength + 1);
+                mapper[xi] = yLength;
+                yArray[yLength++] = createY(y);
             }
         } else {
-            ensureXCapacity(xesLength + 1);
+            ensureXCapacity(xLength + 1);
             if (yi >= 0) {
-                maper[xesLength] = yi;
+                mapper[xLength] = yi;
             } else {
-                ensureYCapacity(yesLength + 1);
-                maper[xesLength] = yesLength;
-                yes[yesLength++] = createY(y);
+                ensureYCapacity(yLength + 1);
+                mapper[xLength] = yLength;
+                yArray[yLength++] = createY(y);
             }
-            xes[xesLength++] = x;
+            xArray[xLength++] = x;
         }
     }
 
@@ -79,22 +79,22 @@ class FuncMap<X, Y> {
     }
 
     private void ensureXCapacity(int minCapacity) {
-        if (xes == EMPTY_XDATA) {
+        if (xArray == EMPTY_XDATA) {
             minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
         }
 
         // overflow-conscious code
-        if (minCapacity - xes.length > 0)
+        if (minCapacity - xArray.length > 0)
             growX(minCapacity);
     }
 
     private void ensureYCapacity(int minCapacity) {
-        if (yes == EMPTY_YDATA) {
+        if (yArray == EMPTY_YDATA) {
             minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
         }
 
         // overflow-conscious code
-        if (minCapacity - yes.length > 0)
+        if (minCapacity - yArray.length > 0)
             growY(minCapacity);
     }
 
@@ -106,15 +106,15 @@ class FuncMap<X, Y> {
      */
     private void growX(int minCapacity) {
         // overflow-conscious code
-        int oldCapacity = xes.length;
+        int oldCapacity = xArray.length;
         int newCapacity = oldCapacity + (oldCapacity >> 1);
         if (newCapacity - minCapacity < 0)
             newCapacity = minCapacity;
         if (newCapacity - MAX_ARRAY_SIZE > 0)
             newCapacity = hugeCapacity(minCapacity);
         // minCapacity is usually close to size, so this is a win:
-        xes = Arrays.copyOf(xes, newCapacity);
-        maper = Arrays.copyOf(maper, newCapacity);
+        xArray = Arrays.copyOf(xArray, newCapacity);
+        mapper = Arrays.copyOf(mapper, newCapacity);
     }
 
     /**
@@ -125,14 +125,14 @@ class FuncMap<X, Y> {
      */
     private void growY(int minCapacity) {
         // overflow-conscious code
-        int oldCapacity = yes.length;
+        int oldCapacity = yArray.length;
         int newCapacity = oldCapacity + (oldCapacity >> 1);
         if (newCapacity - minCapacity < 0)
             newCapacity = minCapacity;
         if (newCapacity - MAX_ARRAY_SIZE > 0)
             newCapacity = hugeCapacity(minCapacity);
         // minCapacity is usually close to size, so this is a win:
-        yes = Arrays.copyOf(yes, newCapacity);
+        yArray = Arrays.copyOf(yArray, newCapacity);
     }
 
     private static int hugeCapacity(int minCapacity) {
@@ -145,19 +145,19 @@ class FuncMap<X, Y> {
 
     @SuppressWarnings("unchecked")
     public X getXAt(int index) {
-        if (index >= xesLength) {
+        if (index >= xLength) {
             throw new IndexOutOfBoundsException();
         } else {
-            return (X) xes[index];
+            return (X) xArray[index];
         }
     }
 
     @SuppressWarnings("unchecked")
     public Y getYAt(int index) {
-        if (index >= yesLength) {
+        if (index >= yLength) {
             throw new IndexOutOfBoundsException();
         } else {
-            return (Y) yes[index];
+            return (Y) yArray[index];
         }
     }
 
@@ -165,11 +165,11 @@ class FuncMap<X, Y> {
     @NonNull
     public X[] getX(Y y) {
         int yi = indexOfY(y);
-        int rc = yes[yi].refCount;
+        int rc = yArray[yi].refCount;
         X[] rs = (X[]) new Object[yi >= 0 ? (rc - 1) : 0];
-        for (int i = 0, ri = 0; i < xesLength && ri < rc; i++) {
-            if (maper[i] == yi) {
-                rs[ri++] = (X) xes[i];
+        for (int i = 0, ri = 0; i < xLength && ri < rc; i++) {
+            if (mapper[i] == yi) {
+                rs[ri++] = (X) xArray[i];
             }
         }
         return rs;
@@ -180,14 +180,14 @@ class FuncMap<X, Y> {
     public Y getY(X x) {
         int xi = indexOfX(x);
         if (xi >= 0) {
-            return (Y) yes[maper[xi]].value;
+            return (Y) yArray[mapper[xi]].value;
         }
         return null;
     }
 
     public int indexOfY(Y y) {
-        for (int i = 0; i < yesLength; i++) {
-            if (yes[i].value == y) {
+        for (int i = 0; i < yLength; i++) {
+            if (yArray[i].value == y) {
                 return i;
             }
         }
@@ -195,8 +195,8 @@ class FuncMap<X, Y> {
     }
 
     public int indexOfX(X x) {
-        for (int i = 0; i < xesLength; i++) {
-            if (xes[i] == x) {
+        for (int i = 0; i < xLength; i++) {
+            if (xArray[i] == x) {
                 return i;
             }
         }
@@ -207,8 +207,8 @@ class FuncMap<X, Y> {
         if (x == null) {
             return false;
         } else {
-            for (int i = 0; i < xesLength; i++) {
-                if (x == xes[i]) {
+            for (int i = 0; i < xLength; i++) {
+                if (x == xArray[i]) {
                     return true;
                 }
             }
@@ -220,8 +220,8 @@ class FuncMap<X, Y> {
         if (y == null) {
             return false;
         } else {
-            for (int i = 0; i < xesLength; i++) {
-                if (y == yes[i].value) {
+            for (int i = 0; i < xLength; i++) {
+                if (y == yArray[i].value) {
                     return true;
                 }
             }
@@ -234,29 +234,29 @@ class FuncMap<X, Y> {
             return false;
         } else {
             int i = 0;
-            for (; i < xesLength; i++) {
-                if (x == xes[i]) {
+            for (; i < xLength; i++) {
+                if (x == xArray[i]) {
                     break;
                 }
             }
 
-            if (i < xesLength) {
-                int yi = maper[i];
-                System.arraycopy(xes, i + 1, xes, i, xesLength - 1 - i);
-                System.arraycopy(maper, i + 1, maper, i, xesLength - 1 - i);
-                xesLength--;
-                YHolder yHolder = yes[yi];
+            if (i < xLength) {
+                int yi = mapper[i];
+                System.arraycopy(xArray, i + 1, xArray, i, xLength - 1 - i);
+                System.arraycopy(mapper, i + 1, mapper, i, xLength - 1 - i);
+                xLength--;
+                YHolder yHolder = yArray[yi];
                 yHolder.refCount--;
 
                 if (yHolder.refCount == 0) {
                     yHolder.value = null;
 
-                    System.arraycopy(yes, yi + 1, yes, yi, yesLength - 1 - yi);
-                    yesLength--;
+                    System.arraycopy(yArray, yi + 1, yArray, yi, yLength - 1 - yi);
+                    yLength--;
 
-                    for (int mi = 0; mi < xesLength; mi++) {
-                        if (maper[mi] > yi) {
-                            maper[mi]--;
+                    for (int mi = 0; mi < xLength; mi++) {
+                        if (mapper[mi] > yi) {
+                            mapper[mi]--;
                         }
                     }
                 }
@@ -272,22 +272,22 @@ class FuncMap<X, Y> {
         if (yi == -1) {
             return false;
         } else {
-            YHolder yHolder = yes[yi];
+            YHolder yHolder = yArray[yi];
             yHolder.refCount = 0;
             yHolder.value = null;
-            System.arraycopy(yes, yi + 1, yes, yi, yesLength - 1 - yi);
-            yesLength--;
+            System.arraycopy(yArray, yi + 1, yArray, yi, yLength - 1 - yi);
+            yLength--;
 
-            for (int i = 0; i < xesLength; i++) {
-                if (maper[i] == yi) {
-                    System.arraycopy(xes, i + 1, xes, i, xesLength - 1 - i);
-                    System.arraycopy(maper, i + 1, maper, i, xesLength - 1 - i);
-                    xesLength--;
+            for (int i = 0; i < xLength; i++) {
+                if (mapper[i] == yi) {
+                    System.arraycopy(xArray, i + 1, xArray, i, xLength - 1 - i);
+                    System.arraycopy(mapper, i + 1, mapper, i, xLength - 1 - i);
+                    xLength--;
                 }
             }
-            for (int mi = 0; mi < xesLength; mi++) {
-                if (maper[mi] > yi) {
-                    maper[mi]--;
+            for (int mi = 0; mi < xLength; mi++) {
+                if (mapper[mi] > yi) {
+                    mapper[mi]--;
                 }
             }
             return true;
