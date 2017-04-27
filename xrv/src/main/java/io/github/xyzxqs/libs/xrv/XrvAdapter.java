@@ -24,7 +24,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,14 +41,14 @@ public abstract class XrvAdapter extends RecyclerView.Adapter {
 
     private final Map<Class<?>, XrvProviderAssigner> dataTypeAssignerMap;
     private final Set<Class<? extends XrvProvider>> providerTypeSet;
-    private final List<XrvProvider> providerList;
+    private final FuncMap<XrvProvider, XrvProviderAssigner> assignerProviderMap;
 
     private LayoutInflater layoutInflater;
 
     public XrvAdapter() {
         dataTypeAssignerMap = new ArrayMap<>();
         providerTypeSet = new ArraySet<>();
-        providerList = new ArrayList<>();
+        assignerProviderMap = new FuncMap<>(10);
     }
 
     /**
@@ -82,10 +81,14 @@ public abstract class XrvAdapter extends RecyclerView.Adapter {
     @CallSuper
     public <T> void register(@NonNull Class<T> dataType, @NonNull XrvProviderAssigner<T> providerAssigner) {
         if (dataTypeAssignerMap.containsKey(dataType)) {
+            XrvProviderAssigner oldAssigner = dataTypeAssignerMap.get(dataType);
+            for (XrvProvider p : assignerProviderMap.getX(oldAssigner)) {
+                providerTypeSet.remove(p.getClass());
+            }
+            assignerProviderMap.rmY(oldAssigner);
             Log.w(TAG, "register: ", new Throwable("providerAssigner {a}.class already handle the {b}.class type, replace it"
                     .replace("{a}", dataTypeAssignerMap.get(dataType).getClass().getSimpleName())
                     .replace("{b}", dataType.getSimpleName())));
-            // FIXME: 2017/4/20 如果重复注册，可能有潜在问题。
         }
         dataTypeAssignerMap.put(dataType, providerAssigner);
     }
@@ -133,17 +136,16 @@ public abstract class XrvAdapter extends RecyclerView.Adapter {
             XrvProvider provider = assigner.assignProvider(obj);
             Class<? extends XrvProvider> providerClazz = provider.getClass();
             if (providerTypeSet.contains(providerClazz)) {
-                if (!providerList.contains(provider)) {
-                    //If a new instance is allowed to add, a potential bug causes undefined behavior
-                    //FIXME rm this exception
+                if (!assignerProviderMap.hasX(provider)) {
+                    //If a new instance is allowed to add, a potential bug will causes undefined behavior
                     throw new IllegalStateException("do not create new instance in " +
                             "XrvProviderAssigner#assignProvider method.");
                 }
             } else {
-                providerList.add(provider);
                 providerTypeSet.add(providerClazz);
+                assignerProviderMap.put(provider, assigner);
             }
-            return providerList.indexOf(provider);
+            return assignerProviderMap.indexOfX(provider);
         } else {
             throw new NotFoundException("no XrvProvider or XrvProviderAssigner found for {a}.class"
                     .replace("{a}", obj.getClass().getSimpleName()));
@@ -151,6 +153,6 @@ public abstract class XrvAdapter extends RecyclerView.Adapter {
     }
 
     protected XrvProvider getProvider(int viewType) {
-        return providerList.get(viewType);
+        return assignerProviderMap.getXAt(viewType);
     }
 }
