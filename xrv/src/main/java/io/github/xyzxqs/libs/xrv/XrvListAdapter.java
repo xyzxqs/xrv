@@ -18,7 +18,6 @@ public class XrvListAdapter extends XrvAdapter {
     }
 
     public XrvListAdapter(List<?> list) {
-        super();
         dataList = list;
     }
 

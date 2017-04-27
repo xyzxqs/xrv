@@ -39,17 +39,11 @@ import java.util.Set;
 public abstract class XrvAdapter extends RecyclerView.Adapter {
     private static final String TAG = XrvAdapter.class.getSimpleName();
 
-    private final Map<Class<?>, XrvProviderAssigner> dataTypeAssignerMap;
-    private final Set<Class<? extends XrvProvider>> providerTypeSet;
-    private final FuncMap<XrvProvider, XrvProviderAssigner> assignerProviderMap;
+    private final Map<Class<?>, XrvProviderAssigner> dataTypeAssignerMap = new ArrayMap<>();
+    private final Set<Class<? extends XrvProvider>> providerTypeSet = new ArraySet<>();
+    private final FuncMap<XrvProvider, XrvProviderAssigner> assignerProviderMap = new FuncMap<>();
 
     private LayoutInflater layoutInflater;
-
-    public XrvAdapter() {
-        dataTypeAssignerMap = new ArrayMap<>();
-        providerTypeSet = new ArraySet<>();
-        assignerProviderMap = new FuncMap<>(10);
-    }
 
     /**
      * Register a {@link XrvProvider} to this adapter, for one data type to one provider mapping
@@ -60,8 +54,7 @@ public abstract class XrvAdapter extends RecyclerView.Adapter {
      * @see #register(Class, XrvProviderAssigner) for one data type to many provider mapping
      */
     @CallSuper
-    public <T> void register(@NonNull Class<T> dataType,
-                             @NonNull final XrvProvider<? super T, ? extends RecyclerView.ViewHolder> provider) {
+    public <T> void register(@NonNull Class<T> dataType, @NonNull final XrvProvider<? super T, ?> provider) {
         register(dataType, new XrvProviderAssigner<T>() {
             @Override
             public XrvProvider<? super T, ? extends RecyclerView.ViewHolder> assignProvider(T item) {
