@@ -120,9 +120,6 @@ public abstract class XrvAdapter extends RecyclerView.Adapter {
         super.onBindViewHolder(holder, position, payloads);
     }
 
-    @Override
-    public abstract int getItemCount();
-
     public abstract Object getItem(int position);
 
     @Override
