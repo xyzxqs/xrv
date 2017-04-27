@@ -2,6 +2,7 @@ package io.github.xyzxqs.libs.xrv;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import java.util.Arrays;
 
@@ -29,11 +30,14 @@ class FuncMap<X, Y> {
     }
 
     private int[] mapper;
+
     private int xLength;
+
     private Object[] xArray;
 
-    private YHolder[] yArray;
     private int yLength;
+
+    private YHolder[] yArray;
 
     public FuncMap() {
         xArray = EMPTY_XDATA;
@@ -51,8 +55,13 @@ class FuncMap<X, Y> {
         int xi = indexOfX(x);
         int yi = indexOfY(y);
         if (xi >= 0) {
+            int oldYi = mapper[xi];
+            yArray[oldYi].refCount--;
+            rmYIfRefCountIsZero(oldYi);
+
             if (yi >= 0) {
                 mapper[xi] = yi;
+                yArray[yi].refCount++;
             } else {
                 ensureYCapacity(yLength + 1);
                 mapper[xi] = yLength;
@@ -62,12 +71,28 @@ class FuncMap<X, Y> {
             ensureXCapacity(xLength + 1);
             if (yi >= 0) {
                 mapper[xLength] = yi;
+                yArray[yi].refCount++;
             } else {
                 ensureYCapacity(yLength + 1);
                 mapper[xLength] = yLength;
                 yArray[yLength++] = createY(y);
             }
             xArray[xLength++] = x;
+        }
+    }
+
+    private void rmYIfRefCountIsZero(int index) {
+        YHolder oldY = yArray[index];
+        if (oldY.refCount == 0) {
+            oldY.value = null;
+            System.arraycopy(yArray, index + 1, yArray, index, yLength - 1 - index);
+            yLength--;
+
+            for (int mi = 0; mi < xLength; mi++) {
+                if (mapper[mi] > index) {
+                    mapper[mi]--;
+                }
+            }
         }
     }
 
@@ -166,13 +191,13 @@ class FuncMap<X, Y> {
     public X[] getX(Y y) {
         int yi = indexOfY(y);
         int rc = yArray[yi].refCount;
-        X[] rs = (X[]) new Object[yi >= 0 ? (rc - 1) : 0];
+        Object[] rs = new Object[yi >= 0 ? rc : 0];
         for (int i = 0, ri = 0; i < xLength && ri < rc; i++) {
             if (mapper[i] == yi) {
-                rs[ri++] = (X) xArray[i];
+                rs[ri++] = xArray[i];
             }
         }
-        return rs;
+        return (X[]) rs;
     }
 
     @SuppressWarnings("unchecked")
@@ -245,21 +270,8 @@ class FuncMap<X, Y> {
                 System.arraycopy(xArray, i + 1, xArray, i, xLength - 1 - i);
                 System.arraycopy(mapper, i + 1, mapper, i, xLength - 1 - i);
                 xLength--;
-                YHolder yHolder = yArray[yi];
-                yHolder.refCount--;
-
-                if (yHolder.refCount == 0) {
-                    yHolder.value = null;
-
-                    System.arraycopy(yArray, yi + 1, yArray, yi, yLength - 1 - yi);
-                    yLength--;
-
-                    for (int mi = 0; mi < xLength; mi++) {
-                        if (mapper[mi] > yi) {
-                            mapper[mi]--;
-                        }
-                    }
-                }
+                yArray[yi].refCount--;
+                rmYIfRefCountIsZero(yi);
                 return true;
             } else {
                 return false;
@@ -272,12 +284,6 @@ class FuncMap<X, Y> {
         if (yi == -1) {
             return false;
         } else {
-            YHolder yHolder = yArray[yi];
-            yHolder.refCount = 0;
-            yHolder.value = null;
-            System.arraycopy(yArray, yi + 1, yArray, yi, yLength - 1 - yi);
-            yLength--;
-
             for (int i = 0; i < xLength; i++) {
                 if (mapper[i] == yi) {
                     System.arraycopy(xArray, i + 1, xArray, i, xLength - 1 - i);
@@ -285,11 +291,8 @@ class FuncMap<X, Y> {
                     xLength--;
                 }
             }
-            for (int mi = 0; mi < xLength; mi++) {
-                if (mapper[mi] > yi) {
-                    mapper[mi]--;
-                }
-            }
+            yArray[yi].refCount = 0;
+            rmYIfRefCountIsZero(yi);
             return true;
         }
     }
