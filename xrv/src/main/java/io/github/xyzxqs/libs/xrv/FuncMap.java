@@ -59,10 +59,8 @@ class FuncMap<X, Y> {
         int yi = indexOfY(y);
         if (xi >= 0) {
             int oldYi = mapper[xi];
-            if (oldYi >= 0) {
-                yArray[oldYi].refCount--;
-                rmYIfRefCountIsZero(oldYi);
-            }
+            yArray[oldYi].refCount--;
+            rmYIfRefCountIsZero(oldYi);
             if (yi >= 0) {
                 mapper[xi] = yi;
                 yArray[yi].refCount++;
@@ -208,18 +206,13 @@ class FuncMap<X, Y> {
     public Y getY(X x) {
         int xi = indexOfX(x);
         if (xi >= 0) {
-            int yi = mapper[xi];
-            if (yi >= 0) {
-                return (Y) yArray[yi].value;
-            } else {
-                return null;
-            }
+            return (Y) yArray[mapper[xi]].value;
         } else {
             return null;
         }
     }
 
-    private int indexOfY(Y y) {
+    public int indexOfY(Y y) {
         for (int i = 0; i < yLength; i++) {
             if (yArray[i].value == y) {
                 return i;
@@ -273,14 +266,11 @@ class FuncMap<X, Y> {
                     break;
                 }
             }
-
             if (i < xLength) {
                 int yi = mapper[i];
-                if (yi >= 0) {
-                    removeXInternal(i);
-                    yArray[yi].refCount--;
-                    rmYIfRefCountIsZero(yi);
-                }
+                removeXInternal(i);
+                yArray[yi].refCount--;
+                rmYIfRefCountIsZero(yi);
                 return true;
             } else {
                 return false;
@@ -289,12 +279,11 @@ class FuncMap<X, Y> {
     }
 
     private void removeXInternal(int i) {
-        /*为什么注释？不能删除，只能是标记为不可用，不然indexOfX方法不可信，将导致rv adapter的item type不稳定
         System.arraycopy(xArray, i + 1, xArray, i, xLength - 1 - i);
+        xArray[xLength - 1] = null;
         System.arraycopy(mapper, i + 1, mapper, i, xLength - 1 - i);
+        mapper[xLength - 1] = -1;
         xLength--;
-        */
-        mapper[i] = -2;
     }
 
     public boolean rmY(Y y) {

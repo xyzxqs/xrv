@@ -75,8 +75,8 @@ public class FuncMapTest {
         assertEquals(2, xyFuncMap.getX(y1).size());
         xyFuncMap.rmY(y1);
 
-        assertTrue(xyFuncMap.hasX(x1));
-        assertTrue(xyFuncMap.hasX(x2));
+        assertFalse(xyFuncMap.hasX(x1));
+        assertFalse(xyFuncMap.hasX(x2));
         assertTrue(xyFuncMap.hasX(x3));
 
         assertFalse(xyFuncMap.hasY(y1));
@@ -99,7 +99,7 @@ public class FuncMapTest {
         assertEquals(y2, xyFuncMap.getY(x1));
 
         xyFuncMap.rmX(x1);
-        assertEquals(0, xyFuncMap.indexOfX(x1));
+        assertEquals(-1, xyFuncMap.indexOfX(x1));
         assertNull(xyFuncMap.getY(x1));
     }
 }
