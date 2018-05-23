@@ -29,14 +29,14 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * XrvAdapter, subclass of {@link android.support.v7.widget.RecyclerView.Adapter}.
+ * XrvAdapter, subclass of {@link RecyclerView.Adapter}.
  *
  * @author xyzxqs (xyzxqs@gmail.com)
- * @see android.support.v7.widget.RecyclerView.Adapter
+ * @see RecyclerView.Adapter
  * @see XrvProvider
  */
 
-public abstract class XrvAdapter extends RecyclerView.Adapter {
+public abstract class XrvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String TAG = XrvAdapter.class.getSimpleName();
 
     private final Map<Class<?>, XrvProviderAssigner> dataTypeAssignerMap = new ArrayMap<>();
@@ -72,7 +72,7 @@ public abstract class XrvAdapter extends RecyclerView.Adapter {
      * @see #register(Class, XrvProvider) for one data type to one provider mapping
      */
     @CallSuper
-    public <T> void register(@NonNull Class<T> dataType, @NonNull XrvProviderAssigner<T> providerAssigner) {
+    public  <T> void register(@NonNull Class<T> dataType, @NonNull XrvProviderAssigner<T> providerAssigner) {
         if (dataTypeAssignerMap.containsKey(dataType)) {
             XrvProviderAssigner oldAssigner = dataTypeAssignerMap.get(dataType);
             for (XrvProvider p : assignerProviderMap.getX(oldAssigner)) {
@@ -86,6 +86,7 @@ public abstract class XrvAdapter extends RecyclerView.Adapter {
         dataTypeAssignerMap.put(dataType, providerAssigner);
     }
 
+    @NonNull
     @Override
     @CallSuper
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -98,19 +99,20 @@ public abstract class XrvAdapter extends RecyclerView.Adapter {
     }
 
     @Override
-    @CallSuper
-    @SuppressWarnings("unchecked")//guarded by register
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        Object item = getItem(position);
-        int type = getItemViewType(position);
-        getProvider(type).onBindViewHolder(holder, item);
+    public final void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        //不应该使用这个接口
+        Log.w(TAG, "please use onBindViewHolder(RecyclerView.ViewHolder, int, List<Object>)");
     }
+
 
     @Override
     @CallSuper
     @SuppressWarnings("unchecked")
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position, List payloads) {
-        super.onBindViewHolder(holder, position, payloads);
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position, List<Object> payloads) {
+        //do not call super in here
+        Object item = getItem(position);
+        int type = getItemViewType(position);
+        getProvider(type).onBindViewHolder(holder, item, payloads);
     }
 
     public abstract Object getItem(int position);

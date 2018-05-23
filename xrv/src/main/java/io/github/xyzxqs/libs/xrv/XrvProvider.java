@@ -19,11 +19,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import java.util.List;
+
 /**
  * One XrvProvider is one view type in {@link RecyclerView.Adapter}
  *
  * @param <I> the type of item model data used in this type view
- * @param <V> the subclass type of {@link android.support.v7.widget.RecyclerView.ViewHolder}
+ * @param <V> the subclass type of {@link RecyclerView.ViewHolder}
  * @author xyzxqs (xyzxqs@gmail.com)
  * @see XrvAdapter
  */
@@ -35,6 +37,10 @@ public abstract class XrvProvider<I, V extends RecyclerView.ViewHolder> {
     public abstract V onCreateViewHolder(LayoutInflater inflater, ViewGroup parent);
 
     public abstract void onBindViewHolder(V holder, I itemData);
+
+    public void onBindViewHolder(V holder, I itemData, List<Object> payloads){
+        onBindViewHolder(holder,itemData);
+    }
 
     /**
      * Get the {@link XrvAdapter}
