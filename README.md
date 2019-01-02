@@ -9,7 +9,10 @@ See [demo code](sample/src/main/java/io/github/xyzxqs/app/xrvdemo/MainActivity.j
 #### Gradle:
 ```groovy
 dependencies {
-  implementation 'io.github.xyzxqs.libs:xrv:5.1.1'
+  //use androidx since 6.0.0
+  implementation 'io.github.xyzxqs.libs:xrv:6.0.0'
+  implementation 'androidx.recyclerview:recyclerview:1.1.0-alpha01'
+  implementation 'androidx.annotation:annotation:1.0.1'
 }
 ```
 
