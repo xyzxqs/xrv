@@ -1,9 +1,9 @@
 package io.github.xyzxqs.libs.xrv;
 
-import android.support.annotation.Nullable;
-import android.support.v7.widget.RecyclerView;
-
 import java.util.List;
+
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * @author xyzxqs (xyzxqs@gmail.com)

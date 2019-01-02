@@ -15,11 +15,12 @@
  */
 package io.github.xyzxqs.libs.xrv;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import java.util.List;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * One XrvProvider is one view type in {@link RecyclerView.Adapter}
@@ -38,8 +39,8 @@ public abstract class XrvProvider<I, V extends RecyclerView.ViewHolder> {
 
     public abstract void onBindViewHolder(V holder, I itemData);
 
-    public void onBindViewHolder(V holder, I itemData, List<Object> payloads){
-        onBindViewHolder(holder,itemData);
+    public void onBindViewHolder(V holder, I itemData, List<Object> payloads) {
+        onBindViewHolder(holder, itemData);
     }
 
     /**

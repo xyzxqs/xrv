@@ -1,13 +1,13 @@
 package io.github.xyzxqs.app.xrvdemo;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import io.github.xyzxqs.app.xrvdemo.providers.ItemType1Provider;
 import io.github.xyzxqs.app.xrvdemo.providers.ItemType2Provider;
 import io.github.xyzxqs.app.xrvdemo.providers.StringProvider;
@@ -36,7 +36,8 @@ public class MainActivity extends AppCompatActivity {
             //do not create new provider instance in this method
             if (item.type == 1) {
                 return type1Provider;
-            } else {
+            }
+            else {
                 return type2Provider;
             }
         });

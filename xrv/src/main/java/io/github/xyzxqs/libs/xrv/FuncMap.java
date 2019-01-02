@@ -1,10 +1,10 @@
 package io.github.xyzxqs.libs.xrv;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import java.util.Arrays;
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Like the definition of a function, each x has a corresponding y,
@@ -64,17 +64,20 @@ class FuncMap<X, Y> {
             if (yi >= 0) {
                 mapper[xi] = yi;
                 yArray[yi].refCount++;
-            } else {
+            }
+            else {
                 ensureYCapacity(yLength + 1);
                 mapper[xi] = yLength;
                 yArray[yLength++] = createY(y);
             }
-        } else {
+        }
+        else {
             ensureXCapacity(xLength + 1);
             if (yi >= 0) {
                 mapper[xLength] = yi;
                 yArray[yi].refCount++;
-            } else {
+            }
+            else {
                 ensureYCapacity(yLength + 1);
                 mapper[xLength] = yLength;
                 yArray[yLength++] = createY(y);
@@ -174,7 +177,8 @@ class FuncMap<X, Y> {
     public X getXAt(int index) {
         if (index >= xLength) {
             throw new IndexOutOfBoundsException();
-        } else {
+        }
+        else {
             return (X) xArray[index];
         }
     }
@@ -183,7 +187,8 @@ class FuncMap<X, Y> {
     public Y getYAt(int index) {
         if (index >= yLength) {
             throw new IndexOutOfBoundsException();
-        } else {
+        }
+        else {
             return (Y) yArray[index];
         }
     }
@@ -207,7 +212,8 @@ class FuncMap<X, Y> {
         int xi = indexOfX(x);
         if (xi >= 0) {
             return (Y) yArray[mapper[xi]].value;
-        } else {
+        }
+        else {
             return null;
         }
     }
@@ -233,7 +239,8 @@ class FuncMap<X, Y> {
     public boolean hasX(X x) {
         if (x == null) {
             return false;
-        } else {
+        }
+        else {
             for (int i = 0; i < xLength; i++) {
                 if (x == xArray[i]) {
                     return true;
@@ -246,7 +253,8 @@ class FuncMap<X, Y> {
     public boolean hasY(Y y) {
         if (y == null) {
             return false;
-        } else {
+        }
+        else {
             for (int i = 0; i < yLength; i++) {
                 if (y == yArray[i].value) {
                     return true;
@@ -259,7 +267,8 @@ class FuncMap<X, Y> {
     public boolean rmX(X x) {
         if (x == null) {
             return false;
-        } else {
+        }
+        else {
             int i = 0;
             for (; i < xLength; i++) {
                 if (x == xArray[i]) {
@@ -272,7 +281,8 @@ class FuncMap<X, Y> {
                 yArray[yi].refCount--;
                 rmYIfRefCountIsZero(yi);
                 return true;
-            } else {
+            }
+            else {
                 return false;
             }
         }
@@ -290,7 +300,8 @@ class FuncMap<X, Y> {
         int yi = indexOfY(y);
         if (yi == -1) {
             return false;
-        } else {
+        }
+        else {
             for (int i = 0; i < xLength; i++) {
                 if (mapper[i] == yi) {
                     removeXInternal(i);

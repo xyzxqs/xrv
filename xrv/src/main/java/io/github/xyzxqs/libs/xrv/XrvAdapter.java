@@ -15,11 +15,6 @@
  */
 package io.github.xyzxqs.libs.xrv;
 
-import android.support.annotation.CallSuper;
-import android.support.annotation.NonNull;
-import android.support.v4.util.ArrayMap;
-import android.support.v4.util.ArraySet;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -27,6 +22,12 @@ import android.view.ViewGroup;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
+import androidx.collection.ArrayMap;
+import androidx.collection.ArraySet;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * XrvAdapter, subclass of {@link RecyclerView.Adapter}.
@@ -72,7 +73,7 @@ public abstract class XrvAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
      * @see #register(Class, XrvProvider) for one data type to one provider mapping
      */
     @CallSuper
-    public  <T> void register(@NonNull Class<T> dataType, @NonNull XrvProviderAssigner<T> providerAssigner) {
+    public <T> void register(@NonNull Class<T> dataType, @NonNull XrvProviderAssigner<T> providerAssigner) {
         if (dataTypeAssignerMap.containsKey(dataType)) {
             XrvProviderAssigner oldAssigner = dataTypeAssignerMap.get(dataType);
             for (XrvProvider p : assignerProviderMap.getX(oldAssigner)) {
@@ -133,12 +134,14 @@ public abstract class XrvAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     throw new IllegalStateException("do not create new instance in " +
                             "XrvProviderAssigner#assignProvider method.");
                 }
-            } else {
+            }
+            else {
                 providerTypeSet.add(providerClazz);
                 assignerProviderMap.connect(provider, assigner);
             }
             return assignerProviderMap.indexOfX(provider);
-        } else {
+        }
+        else {
             throw new NotFoundException("no XrvProvider or XrvProviderAssigner found for {a}.class"
                     .replace("{a}", obj.getClass().getSimpleName()));
         }
